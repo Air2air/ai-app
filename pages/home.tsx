@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { DRILLDOWN, INITIAL_BUTTONS, NUMBER_OF_RESPONSES } from "../config/prompts";
+import {
+  DRILLDOWN,
+  INITIAL_BUTTONS,
+  NUMBER_OF_RESPONSES,
+} from "../config/prompts";
 import { fetchData } from "./api/fetchData";
 import Button from "../components/Button";
+import ButtonSkeleton from "@components/ButtonSkeleton";
 
 interface ButtonData {
   title: string;
@@ -17,9 +22,8 @@ const Home: React.FC = () => {
 
   const handleClick = async (selection: string) => {
     setPromptHistory((prevPromptHistory) => [...prevPromptHistory, selection]); // Append the new selection to the prompt history
-    setLoading(true); // Set loading to true when fetching starts
+    setLoading(true);
 
-    // Create a structured prompt with labeled sections
     const newCompletePrompt = `
       
       ## Drill Down Instructions
@@ -50,31 +54,33 @@ const Home: React.FC = () => {
         );
         setStructuredResponse(
           JSON.stringify(data.choices, null, NUMBER_OF_RESPONSES - 1)
-        ); // Store the structured response as a formatted JSON string
+        );
+        setLoading(false);
       } else {
         console.error("Unexpected number of choices:", data.choices.length);
       }
     } catch (error) {
       console.error("Failed to fetch choices:", error);
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="button-container">
-      <div className="button-row">
-        {buttons.map((button, index) => (
-          <Button
-            key={index}
-            loading={loading}
-            title={button.title}
-            text={button.text}
-            onClick={() => handleClick(button.title)}
-          />
-        ))}
-        <pre>{structuredResponse}</pre>
-      </div>
+    <div className="button-row">
+      {buttons.map((button, index) => (
+        <div key={index}>
+          {loading ? (
+            <ButtonSkeleton />
+          ) : (
+            <Button
+              title={button.title}
+              text={button.text}
+              onClick={() => handleClick(button.title)}
+            />
+          )}
+        </div>
+      ))}
+      {/* <pre>{structuredResponse}</pre> */}
     </div>
   );
 };
