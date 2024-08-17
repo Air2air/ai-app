@@ -2,7 +2,7 @@ import Home from "./home";
 
 const IndexPage = () => {
   return (
-    <div>
+    <div className="container">
       <Home />
     </div>
   );

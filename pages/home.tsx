@@ -38,36 +38,43 @@ const Home: React.FC = () => {
       const data = await fetchData(newCompletePrompt);
       console.log("Fetched data:", data);
 
-      if (Array.isArray(data.choices) && data.choices.length === NUMBER_OF_RESPONSES) {
+      if (
+        Array.isArray(data.choices) &&
+        data.choices.length === NUMBER_OF_RESPONSES
+      ) {
         setButtons(
           data.choices.map((choice) => ({
             title: choice.title,
             text: choice.text,
           }))
         );
-        setStructuredResponse(JSON.stringify(data.choices, null, NUMBER_OF_RESPONSES -1)); // Store the structured response as a formatted JSON string
+        setStructuredResponse(
+          JSON.stringify(data.choices, null, NUMBER_OF_RESPONSES - 1)
+        ); // Store the structured response as a formatted JSON string
       } else {
         console.error("Unexpected number of choices:", data.choices.length);
       }
     } catch (error) {
       console.error("Failed to fetch choices:", error);
     } finally {
-      setLoading(false); // Set loading to false when fetching ends
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      {buttons.map((button, index) => (
-        <Button
-          key={index}
-          title={button.title}
-          text={button.text}
-          onClick={() => handleClick(button.title)}
-        />
-      ))}
-      {loading && <p>Loading...</p>}
-      <pre>{structuredResponse}</pre>
+    <div className="button-container">
+      <div className="button-row">
+        {buttons.map((button, index) => (
+          <Button
+            key={index}
+            loading={loading}
+            title={button.title}
+            text={button.text}
+            onClick={() => handleClick(button.title)}
+          />
+        ))}
+        <pre>{structuredResponse}</pre>
+      </div>
     </div>
   );
 };
