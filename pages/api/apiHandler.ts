@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
-import { NUMBER_OF_RESPONSES, DRILLDOWN } from "../prompts";
+import { NUMBER_OF_RESPONSES, DRILLDOWN } from "../../config/prompts";
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error(

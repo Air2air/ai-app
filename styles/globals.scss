@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @import "./buttons.scss";
+@import "./pre.scss";
 
 :root {
   --foreground-rgb: 0, 0, 0;

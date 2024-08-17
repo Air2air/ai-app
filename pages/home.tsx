@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DRILLDOWN, INITIAL_BUTTONS, NUMBER_OF_RESPONSES } from "./prompts";
+import { DRILLDOWN, INITIAL_BUTTONS, NUMBER_OF_RESPONSES } from "../config/prompts";
 import { fetchData } from "./api/fetchData";
 import Button from "../components/Button";
 
