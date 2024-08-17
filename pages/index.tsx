@@ -1,14 +1,11 @@
 // pages/index.tsx
 
 import { useState } from "react";
-import { DRILLDOWN } from "./prompts";
+import { DRILLDOWN, INITIAL_BUTTONS } from "./prompts";
+import { fetchData } from "./api/fetchData";
 
 const Home: React.FC = () => {
-  const [buttons, setButtons] = useState<string[]>([
-    "Cats",
-    "Dogs",
-    "Beardies",
-  ]);
+  const [buttons, setButtons] = useState<string[]>(INITIAL_BUTTONS);
   const [promptHistory, setPromptHistory] = useState<string[]>([]); // Initialize promptHistory as an array
   const [loading, setLoading] = useState<boolean>(false); // Add loading state
   const [completePrompt, setCompletePrompt] = useState<string>(""); // Add state for complete prompt
@@ -33,16 +30,8 @@ const Home: React.FC = () => {
 
     setCompletePrompt(newCompletePrompt); // Update the complete prompt state
 
-    const response = await fetch("/api/apiHandler", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ selection: newCompletePrompt }), // Send the structured prompt
-    });
-
-    if (response.ok) {
-      const data = await response.json();
+    try {
+      const data = await fetchData(newCompletePrompt);
       console.log("Fetched data:", data);
 
       // Ensure the response contains exactly 3 objects
@@ -52,11 +41,11 @@ const Home: React.FC = () => {
       } else {
         console.error("Unexpected number of choices:", data.choices.length);
       }
-    } else {
-      console.error("Failed to fetch choices");
+    } catch (error) {
+      console.error("Failed to fetch choices:", error);
+    } finally {
+      setLoading(false); // Set loading to false when fetching ends
     }
-
-    setLoading(false); // Set loading to false when fetching ends
   };
 
   return (

@@ -1,5 +1,3 @@
-// pages/api/apiHandler.ts
-
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { NUMBER_OF_RESPONSES, DRILLDOWN } from "../prompts";
@@ -38,9 +36,6 @@ export default async function handler(
     { role: "user", content: `New User Input:\n${selection}` },
   ];
 
-  console.log(`Received selection: ${selection}`);
-  console.log(`Generated messages: ${JSON.stringify(messages)}`);
-
   try {
     const response = await openaiClient.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -49,7 +44,7 @@ export default async function handler(
       n: NUMBER_OF_RESPONSES,
       temperature: 0.7,
       top_p: 0.9,
-      frequency_penalty: 0.8,
+      frequency_penalty: 0,
       presence_penalty: 0.6,
       stop: ["\n"],
     });
@@ -66,7 +61,7 @@ export default async function handler(
 
     res.status(200).json({ choices });
   } catch (error) {
-    console.error("Error fetching choices:", error instanceof Error ? error.message : String(error));
+    console.error("Error fetching choices:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
