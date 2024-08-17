@@ -1,10 +1,8 @@
+// pages/api/apiHandler.ts
+
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
-import {
-  NUMBER_OF_RESPONSES,
-  MAX_CHARACTERS,
-  DRILLDOWN,
-} from "../prompts";
+import { NUMBER_OF_RESPONSES, DRILLDOWN } from "../prompts";
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error(
@@ -16,11 +14,6 @@ const configuration = {
   apiKey: process.env.OPENAI_API_KEY,
 };
 const openaiClient = new OpenAI(configuration);
-
-interface ChatMessage {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -39,7 +32,7 @@ export default async function handler(
     return;
   }
 
-  const messages: ChatMessage[] = [
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: "system", content: "You are a helpful assistant." },
     { role: "user", content: DRILLDOWN },
     { role: "user", content: `New User Input:\n${selection}` },
@@ -55,34 +48,25 @@ export default async function handler(
       max_tokens: 150,
       n: NUMBER_OF_RESPONSES,
       temperature: 0.7,
-      top_p: 0.9, // Added nucleus sampling
-      frequency_penalty: 0, // No penalty for frequency
-      presence_penalty: 0.6, // Encourages the model to introduce new topics
-      stop: ["\n"], // Stop generating when a newline character is encountered
-      logprobs: null, // Do not include token log probabilities
-
+      top_p: 0.9,
+      frequency_penalty: 0.8,
+      presence_penalty: 0.6,
+      stop: ["\n"],
     });
 
     if (!response.choices || response.choices.length < NUMBER_OF_RESPONSES) {
-      throw new Error(
-        "Less than the required number of choices returned by OpenAI"
-      );
+      throw new Error("Less than the required number of choices returned by OpenAI");
     }
 
-    // Ensure each response does not exceed 150 characters
-    const choices = response.choices
-      .map((choice) => {
-        const content = choice.message?.content?.trim();
-        return content && content.length > MAX_CHARACTERS
-          ? content.slice(0, MAX_CHARACTERS)
-          : content;
-      })
-      .filter(Boolean);
+    const choices = response.choices.map((choice) => {
+      const content = choice.message.content?.trim() ?? "";
+      const [title, text] = content.split("\n\n", 2);
+      return { title: title || "Untitled", text: text || content };
+    });
 
-    console.log(`Generated choices: ${choices}`);
     res.status(200).json({ choices });
   } catch (error) {
-    console.error("Error generating choices:", error);
-    res.status(500).json({ error: "Failed to generate choices" });
+    console.error("Error fetching choices:", error instanceof Error ? error.message : String(error));
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
