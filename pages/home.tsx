@@ -13,6 +13,8 @@ interface ButtonData {
   text: string;
 }
 
+// pages/home.tsx
+// pages/home.tsx
 const Home: React.FC = () => {
   const [buttons, setButtons] = useState<ButtonData[]>(INITIAL_BUTTONS);
   const [promptHistory, setPromptHistory] = useState<string[]>([]); // Initialize promptHistory as an array
@@ -20,24 +22,7 @@ const Home: React.FC = () => {
   const [completePrompt, setCompletePrompt] = useState<string>(""); // Add state for complete prompt
   const [structuredResponse, setStructuredResponse] = useState<string>(""); // Add state for structured response
 
-  const handleClick = async (selection: string) => {
-    setPromptHistory((prevPromptHistory) => [...prevPromptHistory, selection]); // Append the new selection to the prompt history
-    setLoading(true);
-
-    const newCompletePrompt = `
-      
-      ## Drill Down Instructions
-      ${DRILLDOWN}
-      
-      ## Conversation History
-      ${promptHistory.join("\n")}
-      
-      ## New User Input
-      ${selection}
-    `;
-
-    setCompletePrompt(newCompletePrompt); // Update the complete prompt state
-
+  const handleClick = async (newCompletePrompt: string) => {
     try {
       const data = await fetchData(newCompletePrompt);
       console.log("Fetched data:", data);
@@ -65,6 +50,30 @@ const Home: React.FC = () => {
     }
   };
 
+  const handleButtonClicked = async (button: ButtonData) => {
+    setPromptHistory((prevPromptHistory) => [...prevPromptHistory, button.title]); // Append the new selection to the prompt history
+    setLoading(true);
+
+    const newCompletePrompt = `
+      
+      ## Drill Down Instructions
+      ${DRILLDOWN}
+      
+      ## Conversation History
+      ${promptHistory.join("\n")}
+      
+      ## New User Input
+      ${button.title}
+      
+      ## Button Text
+      ${button.text}
+    `;
+
+    setCompletePrompt(newCompletePrompt); // Update the complete prompt state
+
+    await handleClick(newCompletePrompt);
+  };
+
   return (
     <div className="button-row">
       {buttons.map((button, index) => (
@@ -75,12 +84,13 @@ const Home: React.FC = () => {
             <Button
               title={button.title}
               text={button.text}
-              onClick={() => handleClick(button.title)}
+              onClick={() => handleButtonClicked(button)}
+              key={index}
             />
           )}
         </div>
       ))}
-      {/* <pre>{structuredResponse}</pre> */}
+      <pre>{structuredResponse}</pre>
     </div>
   );
 };
